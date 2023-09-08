@@ -1,3 +1,13 @@
+//* Anything not a comment added by me.
+
+const express = require("express");
+const router = new express.Router();
+const ExpressError = require("../expressError");
+const db = require("../db");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require("../config");
+
 /** GET /:id - get detail of message.
  *
  * => {message: {id,
@@ -11,14 +21,12 @@
  *
  **/
 
-
 /** POST / - post message.
  *
  * {to_username, body} =>
  *   {message: {id, from_username, to_username, body, sent_at}}
  *
  **/
-
 
 /** POST/:id/read - mark message as read:
  *
@@ -28,3 +36,4 @@
  *
  **/
 
+module.exports = router;
