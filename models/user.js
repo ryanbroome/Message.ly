@@ -130,30 +130,32 @@ WHERE username = $1`,
    */
 
   static async messagesTo(username) {
-    const result = await db.query(`
+    const result = await db.query(
+      `
     SELECT m.id, 
                     m.from_username,
+                    u.first_name,
+                    u.last_name,
+                    u.phone,
                     m.body,
                     m.sent_at, 
-                    m.read_at,
+                    m.read_at
     FROM messages AS m
     JOIN users AS u ON m.from_username = u.username
-    WHERE from_username = $1
+    WHERE to_username = $1
     `,
       [username]
     );
 
     return result.rows.map((r) => ({
       id: r.id,
-      to_user: {
-        username: r.username,
+      from_user: {
+        username: r.from_username,
         first_name: r.first_name,
         last_name: r.last_name,
         phone: r.phone,
       },
     }));
-  }
-    `)
   }
 }
 
