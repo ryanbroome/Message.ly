@@ -7,7 +7,7 @@ const db = require("../db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require("../config");
-// const user = require("../models/user");
+const User = require("../models/user");
 
 /** POST /login - login: {username, password} => {token}
  *
@@ -27,11 +27,11 @@ router.post("/login", async (req, res, next) => {
     WHERE username = $1`,
       [username]
     );
-    const user = results.rows[0];
+    const user = result.rows[0];
     if (user) {
       if (await bcrypt.compare(password, user.password)) {
         const token = jwt.sign({ username }, SECRET_KEY);
-        return res.json({});
+        return res.json({ token });
       }
     }
     throw new ExpressError("Invalid username, password", 400);
@@ -45,4 +45,16 @@ router.post("/login", async (req, res, next) => {
  *
  *  Make sure to update their last-login!
  */
+
+router.post("/register", async (req, res, next) => {
+  try {
+    const { username, password, first_name, last_name, phone } = req.body;
+    const user = await User.register(username, password, first_name, last_name, phone);
+    console.log("user.password", user.password);
+    return res.json({ token: user.password });
+  } catch (e) {
+    return next(e);
+  }
+});
+
 module.exports = router;

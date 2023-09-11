@@ -19,11 +19,7 @@ const User = require("../models/user");
  **/
 router.get("/", async (req, res, next) => {
   try {
-    const results = await db.query(`
-    SELECT username, first_name, last_name, phone
-    FROM users
-    ORDER BY username
-    `);
+    const results = await User.all();
     return res.json({ users: results.rows });
   } catch (e) {
     return next(e);
@@ -60,9 +56,9 @@ router.get("/:username", async (req, res, next) => {
 
 router.get("/:username/to", async (req, res, next) => {
   try {
-    // *const username = req.params.username;
-    // *const msgs = User.messagesTo(username);
-    return res.json({ msgs });
+    const username = req.params.username;
+    const messages = await User.messagesTo(username);
+    return res.json({ messages });
   } catch (e) {
     return next(e);
   }
@@ -77,4 +73,16 @@ router.get("/:username/to", async (req, res, next) => {
  *                 to_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
+
+router.get("/:username/from", async (req, res, next) => {
+  try {
+    const username = req.params.username;
+    const results = await User.messagesFrom(username);
+    console.log(results.rows);
+    return res.json(results);
+  } catch (e) {
+    return next(e);
+  }
+});
+
 module.exports = router;
