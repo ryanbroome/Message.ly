@@ -1,26 +1,18 @@
-//* Anything not a comment added by me.
-
 const express = require("express");
 const router = new express.Router();
-
 const ExpressError = require("../expressError");
-
-const db = require("../db");
-
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { BCRYPT_WORK_FACTOR, SECRET_KEY } = require("../config");
-
+const { ensureCorrectUser, ensureLoggedIn } = require("../middleware/auth");
 const User = require("../models/user");
+
 /** GET / - get list of users.
  *
  * => {users: [{username, first_name, last_name, phone}, ...]}
  *
  **/
-router.get("/", async (req, res, next) => {
+router.get("/", ensureLoggedIn, async (req, res, next) => {
   try {
-    const results = await User.all();
-    return res.json({ users: results.rows });
+    const users = await User.all();
+    return res.json({ users });
   } catch (e) {
     return next(e);
   }
@@ -31,7 +23,9 @@ router.get("/", async (req, res, next) => {
  * => {user: {username, first_name, last_name, phone, join_at, last_login_at}}
  *
  **/
-router.get("/:username", async (req, res, next) => {
+
+/**  Had to use solution to remember using the middleware **/
+router.get("/:username", ensureCorrectUser, async (req, res, next) => {
   try {
     const username = req.params.username;
     if (!username) {
@@ -54,7 +48,7 @@ router.get("/:username", async (req, res, next) => {
  *
  **/
 
-router.get("/:username/to", async (req, res, next) => {
+router.get("/:username/to", ensureCorrectUser, async (req, res, next) => {
   try {
     const username = req.params.username;
     const messages = await User.messagesTo(username);
@@ -73,8 +67,7 @@ router.get("/:username/to", async (req, res, next) => {
  *                 to_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
-
-router.get("/:username/from", async (req, res, next) => {
+router.get("/:username/from", ensureCorrectUser, async (req, res, next) => {
   try {
     const username = req.params.username;
     const results = await User.messagesFrom(username);
